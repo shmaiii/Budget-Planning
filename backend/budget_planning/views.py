@@ -16,14 +16,14 @@ def index(request):
     return HttpResponse("Hello")
 
 
-
-def login(request):
+@csrf_exempt
+def login_view(request):
     if request.method == "POST":
 
         # Attempt to sign user in
         data = json.loads(request.body)
         username = data.get("username", "")
-        password = data.get("content", "")
+        password = data.get("password", "")
         user = authenticate(request, username=username, password=password)
 
         # Check if authentication successful
@@ -38,7 +38,9 @@ def login(request):
             return JsonResponse({
                 "message": "Invalid username and/or password.",
                 "logged_in": False,
-                "user": None
+                "user": None,
+                "username": username,
+                "password": password
             })
               
     else:
@@ -80,14 +82,8 @@ def register(request):
                 "message": "Username already taken.",
                 "logged_in": False
             })
-        login(request, user)
-        return JsonResponse({
-            "message": "",
-            "logged_in": True,
-            "user": request.user
-        })
-    else:
-        return JsonResponse({
+    
+    return JsonResponse({
             "message": "",
             "logged_in": False
         })

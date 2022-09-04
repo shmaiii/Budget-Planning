@@ -2,9 +2,16 @@ import logo from './logo.svg';
 import './App.css';
 import React, { useState, useEffect } from "react";
 
-function Login() {
+function getState() {
+  fetch(`http://127.0.0.1:8000/login`)
+    .then((response) => response.json())
+    .then((result) => {
+      console.log(result);
+    });
+}
 
-  const [message, setMessage] = useState("");
+function Login(props) {
+
   const[username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [confirmation, setConfirmation] = useState("");
@@ -30,13 +37,15 @@ function Login() {
 
   const submitLogin = (event) => {
     event.preventDefault();
+    console.log(username);
+    console.log(password);
   
     const csrftoken = getCookie('csrftoken');
     console.log(csrftoken);
 
     fetch('http://127.0.0.1:8000/login', {
       method: 'POST',
-      credentials: 'include',
+      //credentials: 'include',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -47,8 +56,14 @@ function Login() {
         password: password
       })
     })
-    .then(response => {
-      console.log(response);
+    .then(response => response.json())
+    .then(res => {
+      console.log(res);
+      props.setState({
+        message: res.message,
+        logged_in: res.logged_in,
+        user: res.user
+      });
     });
   }
 
@@ -73,7 +88,8 @@ function Login() {
         confirmation: confirmation
       })
     })
-    .then (response => console.log(response));
+    .then (response => response.json())
+    .then (res => console.log(res));
 
     
   }
@@ -96,7 +112,7 @@ function Login() {
     <React.Fragment>
       <div style={{'display': display.login}}>
         <h2>Log In</h2>
-        {message}
+        {props.state.message}
 
         <form onSubmit={submitLogin}>
           <div className="form-group">
@@ -135,7 +151,7 @@ function Login() {
   )
 }
 
-function Homepage() {
+function Homepage(props) {
 
   return (
     <div>
@@ -146,13 +162,8 @@ function Homepage() {
 
 
 function App() {
-  const[state, setState] = useState({
-    logged_in: false,
-    message: "",
-    user: null
-  });
 
-  useEffect(() => {
+  function getState() {
     fetch(`http://127.0.0.1:8000/login`)
       .then((response) => response.json())
       .then((result) => {
@@ -163,9 +174,17 @@ function App() {
           user: result.user
         });
       });
+  }
+  const[state, setState] = useState({
+    logged_in: false,
+    message: "",
+    user: null
+  });
+
+  useEffect(() => {
+    getState();
   }, []);
 
-  console.log(state);
 
   if(state.logged_in) {
     return (
@@ -174,7 +193,7 @@ function App() {
 
   } else {
     return (
-      <Login setState={setState} />
+      <Login setState={setState} state={state}/>
     );
   }
 }
