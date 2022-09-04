@@ -15,7 +15,8 @@ import json
 def index(request):
     return HttpResponse("Hello")
 
-@csrf_exempt
+
+
 def login(request):
     if request.method == "POST":
 
@@ -54,17 +55,20 @@ def login(request):
                 "message": "",
             })
 
+@csrf_exempt
 def register(request):
     if request.method == "POST":
-        username = request.POST["username"]
-        email = request.POST["email"]
+        data = json.loads(request.body)
+        username = data.get("username", "")
+        email = data.get("email", "")
 
         # Ensure password matches confirmation
-        password = request.POST["password"]
-        confirmation = request.POST["confirmation"]
+        password = data.get("password", "")
+        confirmation = data.get("confirmation" "")
         if password != confirmation:
-            return render(request, "budget_planning/register.html", {
-                "message": "Passwords must match."
+            return JsonResponse({
+                "message": "Passwords must match",
+                "logged_in": False
             })
 
         # Attempt to create new user
@@ -72,13 +76,21 @@ def register(request):
             user = User.objects.create_user(username, email, password)
             user.save()
         except IntegrityError:
-            return render(request, "budget_planning/register.html", {
-                "message": "Username already taken."
+            return JsonResponse({
+                "message": "Username already taken.",
+                "logged_in": False
             })
         login(request, user)
-        return HttpResponseRedirect(reverse("index"))
+        return JsonResponse({
+            "message": "",
+            "logged_in": True,
+            "user": request.user
+        })
     else:
-        return render(request, "budget_planning/register.html")
+        return JsonResponse({
+            "message": "",
+            "logged_in": False
+        })
         
 
 def logout(request):
