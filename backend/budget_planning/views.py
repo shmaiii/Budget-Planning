@@ -98,15 +98,15 @@ def logout(request):
 
 def user_info(request, user_id):
     user = User.objects.get(pk=user_id)
-    expected_expense = user.expected_expense
-    actual_expense = user.actual_expense
+
     savings = user.savings
     reports = Report.objects.filter(owner_user=user)
     
     if request.method == 'GET':
         return JsonResponse({
-            "expected_expense": expected_expense,
-            "actual_expense": actual_expense,
+            "deposits": user.total_deposit,
+            "expected_expense": user.expected_expense.serialize(),
+            "actual_expense": user.actual_expense.serialize(),
             "savings": savings,
             "reports": [report.serialze for report in reports]
         }, safe=False)

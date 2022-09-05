@@ -84,7 +84,10 @@ function Login(props) {
       })
     })
     .then (response => response.json())
-    .then (res => console.log(res));
+    .then (res => {
+      console.log(res);
+      window.location.reload();
+    });
 
     
   }
@@ -148,10 +151,75 @@ function Login(props) {
 
 function Homepage(props) {
   const user = JSON.parse(localStorage.getItem("user"));
+  console.log(props.userInfo);
+
+  const [totalExpected, setTotalExpected] = useState(0);
+  useEffect(function() {
+    let total = 0;
+    const expected_expense = props.userInfo.expected_expense
+    for (let k in expected_expense) {
+      total = total + expected_expense[k.toString()];
+    }
+    setTotalExpected(total);
+  });
+
+  const [totalActual, setTotalActual] = useState(0);
+  useEffect(() => {
+    let total = 0;
+    const actual_expense = props.userInfo.actual_expense
+    for (let k in actual_expense) {
+      total = total + actual_expense[k.toString()];
+    }
+    setTotalActual(total);
+  });
+
   return (
     <div>
       <h1>Welcome {user.username} </h1>
-      <h1>This month at a glance!</h1>
+
+      <div id="homepage_summary">
+        <h3>This month at a glance!</h3>
+        <table id="homepage-table">
+          <tbody>
+          <tr>
+            <th>
+              Total Deposit
+            </th>
+            <th>
+              {props.userInfo.deposits}
+            </th>
+          </tr>
+          <tr>
+            <th>Expected Expense</th>
+            <th>
+              {totalExpected}
+            </th>
+          </tr>
+          <tr>
+            <th>Actual Expense</th>
+            <th>{totalActual}</th>
+          </tr>
+          <tr>
+            <th>Savings</th>
+            <th>{props.userInfo.savings}</th>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="reports">
+        <h3>Latest Reports</h3>
+        { props.userInfo.reports.length === 0 &&
+          <p>No report is available</p>
+        }
+      </div>
+      
+      <div id="homepage-message">
+        { totalActual <= totalExpected && 
+          <h3>You are currently on track!</h3>}
+        { totalActual > totalExpected && 
+          <h3>You have exceeded the expected expense!</h3>}
+        </div>
 
     </div>
     
@@ -168,8 +236,13 @@ function App() {
     user: null
   });
 
-  const[userInfo, setUserInfo] = useState();
-
+  const[userInfo, setUserInfo] = useState({
+    deposits: 0,
+    expected_expense: null,
+    actual_expense: null,
+    reports: [],
+    savings: 0
+  });
   
   useEffect(() => {
     fetch(`http://127.0.0.1:8000/login`)
@@ -191,14 +264,23 @@ function App() {
     if(loggedinUser) {
       fetch(`http://127.0.0.1:8000/user_info/${JSON.parse(localStorage.getItem("user")).id}`)
       .then(response => response.json())
-      .then(result => console.log(result));
+      .then(result => {
+        setUserInfo({
+          deposits: result.deposits,
+          expected_expense: result.expected_expense,
+          actual_expense: result.actual_expense,
+          reports: result.reports,
+          savings: result.savings,
+        })
+
+      });
     }
-  })
+  }, [])
 
 
   if(localStorage.getItem("user")) {
     return (
-      <Homepage setState={setState} state={state} />
+      <Homepage setState={setState} state={state} userInfo={userInfo} />
     );
 
   } else {
