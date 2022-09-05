@@ -2,14 +2,6 @@ import logo from './logo.svg';
 import './App.css';
 import React, { useState, useEffect } from "react";
 
-function getState() {
-  fetch(`http://127.0.0.1:8000/login`)
-    .then((response) => response.json())
-    .then((result) => {
-      console.log(result);
-    });
-}
-
 function Login(props) {
 
   const[username, setUsername] = useState("");
@@ -64,6 +56,9 @@ function Login(props) {
         logged_in: res.logged_in,
         user: res.user
       });
+      if (res.logged_in) {
+        localStorage.setItem('user', JSON.stringify(res.user));
+      }
     });
   }
 
@@ -152,18 +147,31 @@ function Login(props) {
 }
 
 function Homepage(props) {
-
+  const user = JSON.parse(localStorage.getItem("user"));
   return (
     <div>
-      <h1>This is the Home Page</h1>
+      <h1>Welcome {user.username} </h1>
+      <h1>This month at a glance!</h1>
+
     </div>
+    
   );
 }
 
 
 function App() {
 
-  function getState() {
+  
+  const[state, setState] = useState({
+    logged_in: false,
+    message: "",
+    user: null
+  });
+
+  const[userInfo, setUserInfo] = useState();
+
+  
+  useEffect(() => {
     fetch(`http://127.0.0.1:8000/login`)
       .then((response) => response.json())
       .then((result) => {
@@ -174,21 +182,23 @@ function App() {
           user: result.user
         });
       });
-  }
-  const[state, setState] = useState({
-    logged_in: false,
-    message: "",
-    user: null
-  });
+  }, []);
+  
 
   useEffect(() => {
-    getState();
-  }, []);
+    const loggedinUser = localStorage.getItem("user");
+    console.log(loggedinUser);
+    if(loggedinUser) {
+      fetch(`http://127.0.0.1:8000/user_info/${JSON.parse(localStorage.getItem("user")).id}`)
+      .then(response => response.json())
+      .then(result => console.log(result));
+    }
+  })
 
 
-  if(state.logged_in) {
+  if(localStorage.getItem("user")) {
     return (
-      <Homepage setState={setState} />
+      <Homepage setState={setState} state={state} />
     );
 
   } else {

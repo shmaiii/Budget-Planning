@@ -13,7 +13,10 @@ import json
 # Create your views here.
 
 def index(request):
-    return HttpResponse("Hello")
+    if request.user.is_authenticated:
+        return HttpResponse("A user is logged in")
+    return HttpResponse("No user is logged in ")
+    
 
 
 @csrf_exempt
@@ -30,7 +33,7 @@ def login_view(request):
         if user is not None:
             login(request, user)
             return JsonResponse({
-                "logged_in": True,
+                "logged_in": request.user.is_authenticated,
                 "user": user.serialize(),
                 "message": "Logged in as " + request.user.username
             }, safe=False)
@@ -39,11 +42,9 @@ def login_view(request):
                 "message": "Invalid username and/or password.",
                 "logged_in": False,
                 "user": None,
-                "username": username,
-                "password": password
             })
               
-    else:
+    elif request.method == 'GET':
         if request.user.is_authenticated:
             return JsonResponse({
                 "logged_in": True,
@@ -76,6 +77,8 @@ def register(request):
         # Attempt to create new user
         try:
             user = User.objects.create_user(username, email, password)
+            user.expected_expense = Expense()
+            user.actual_expense = Expense()
             user.save()
         except IntegrityError:
             return JsonResponse({
@@ -92,3 +95,18 @@ def register(request):
 def logout(request):
     logout(request)
     return HttpResponseRedirect(reverse("index"))
+
+def user_info(request, user_id):
+    user = User.objects.get(pk=user_id)
+    expected_expense = user.expected_expense
+    actual_expense = user.actual_expense
+    savings = user.savings
+    reports = Report.objects.filter(owner_user=user)
+    
+    if request.method == 'GET':
+        return JsonResponse({
+            "expected_expense": expected_expense,
+            "actual_expense": actual_expense,
+            "savings": savings,
+            "reports": [report.serialze for report in reports]
+        }, safe=False)
