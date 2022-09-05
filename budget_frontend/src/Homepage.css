@@ -1,0 +1,25 @@
+#reports {
+    border-style: groove;
+    border-width: 1px;
+    padding: 10px;
+    width: 60%;
+}
+
+#homepage_summary {
+    width: 60%;
+}
+
+#homepage-message {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.green {
+    color: green;
+    font-style: italic;
+}
+
+.red {
+    color: red;
+    font-style: bold;
+}
