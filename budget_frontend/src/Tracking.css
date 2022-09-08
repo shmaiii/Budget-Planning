@@ -1,0 +1,11 @@
+label {
+    font-weight: bold;
+    
+}
+
+#current-deposit-tracking {
+    width: 60%;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}

@@ -21,8 +21,8 @@ function App() {
 
   const[userInfo, setUserInfo] = useState({
     deposits: 0,
-    expected_expense: null,
-    actual_expense: null,
+    expected_expense: {},
+    actual_expense: {},
     reports: [],
     savings: 0
   });
@@ -73,7 +73,7 @@ function App() {
             <Nav.Link href="/">HomePage</Nav.Link>
             <Nav.Link href="/tracking">Tracking Budget</Nav.Link>
             <Nav.Link href="/reports">Reports</Nav.Link>
-            <Nav.Link href="#">Set up</Nav.Link>
+            <Nav.Link href="#">Log Out</Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </Container>
@@ -82,7 +82,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Homepage setState={setState} state={state} userInfo={userInfo}/>} />
-          <Route path="/tracking" element={<Tracking />} />
+          <Route path="/tracking" element={<Tracking userInfo={userInfo} setUserInfo={setUserInfo}/>} />
           <Route path="/reports" element={<Reports />} />
         </Routes>
       </BrowserRouter>

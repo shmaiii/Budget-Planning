@@ -96,6 +96,7 @@ def logout(request):
     logout(request)
     return HttpResponseRedirect(reverse("index"))
 
+
 def user_info(request, user_id):
     user = User.objects.get(pk=user_id)
 
@@ -110,3 +111,18 @@ def user_info(request, user_id):
             "savings": savings,
             "reports": [report.serialze for report in reports]
         }, safe=False)
+    
+    elif request.method == 'PUT':
+        data = json.loads(request.body)
+        if data.get("expected") is not None:
+            user.expected_expense.groceries = data["groceries"]
+            user.expected_expense.personal = data["personal"]
+            user.expected_expense.mobile = data["mobile"]
+            user.expected_expense.insurance = data["insurance"]
+            user.expected_expense.housing = data["housing"]
+            user.save()
+            return HttpResponse(status=204)
+    else:
+        return JsonResponse({
+            "error": "Not a GET or PUT request"
+        }, status = 400)
