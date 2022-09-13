@@ -66,7 +66,7 @@ function App() {
       <React.Fragment>
     <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
       <Container>
-        <Navbar.Brand href="#">Budget Planning</Navbar.Brand>
+        <Navbar.Brand href="/">Budget Planning</Navbar.Brand>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="me-auto">

@@ -15,15 +15,17 @@ function CurrentDeposit(props) {
 function ExpectedExpense(props) {
     const expected = props.userInfo.expected_expense;
 
-    const [expectedGroceries, setExpectedGroceries] = useState(0);
-    const [expectedPersonal, setExpectedPersonal] = useState(0);
-    const [expectedHousing, setExpectedHousing] = useState(0);
-    const [expectedMobile, setExpectedMobile] = useState(0);
-    const [expectedInsurance, setExpectedInsurance] = useState(0);
+    const [expectedGroceries, setExpectedGroceries] = useState(expected['groceries']);
+    const [expectedPersonal, setExpectedPersonal] = useState(expected.personal);
+    const [expectedHousing, setExpectedHousing] = useState(expected.housing);
+    const [expectedMobile, setExpectedMobile] = useState(expected.mobile);
+    const [expectedInsurance, setExpectedInsurance] = useState(expected.insurance);
     
     console.log(props.userInfo);
     
     console.log(expected);
+    console.log(expectedGroceries);
+    console.log(expectedHousing);
     
     const [display, setDisplay] = useState({
         track_list: "block",
@@ -45,7 +47,10 @@ function ExpectedExpense(props) {
         })
     }
 
-    const submit_expected = () => {
+    const submit_expected = (e) => {
+       
+
+         
         props.setUserInfo({
             ...props.userInfo,
             expected_expense: {
@@ -56,16 +61,26 @@ function ExpectedExpense(props) {
                 insurance: expectedInsurance
             }
         });
+        
 
-        fetch(`http://127.0.0.1:8000/user_info/${JSON.parse(localStorage.getItem("user")).id}`, {
+        console.log("expectedgroceries is now" + expectedGroceries);
+
+        fetch(`http://127.0.0.1:8000/user_info_put/${JSON.parse(localStorage.getItem("user")).id}`, {
             method: 'PUT',
+
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                
+            },
+
             body: JSON.stringify({
                 expected: 1,
                 groceries: parseInt(expectedGroceries),
                 personal: parseInt(expectedPersonal),
                 housing: parseInt(expectedHousing),
                 mobile: parseInt(expectedMobile),
-                insurance: expectedInsurance
+                insurance: parseInt(expectedInsurance)
             })
         })
         .then(res => console.log(res));
@@ -89,15 +104,15 @@ function ExpectedExpense(props) {
 
             <div id="form-div" onSubmit={submit_expected} style={{'display': display.form}}>
                 <form>
-                    <label>Groceries : </label> <input type="number" placeholder={expected} name="groceries" onChange={(e) => setExpectedGroceries(e.target.value)}/>
+                    <label>Groceries : </label> <input type="number" defaultValue={expected['groceries']} name="groceries" onChange={(e) => setExpectedGroceries(e.target.value)}/>
                     <br />
-                    <label>Personal : </label> <input type="number" name="personal" onChange={(e) => setExpectedPersonal(e.target.value)}/>
+                    <label>Personal : </label> <input type="number" defaultValue={expected['personal']} name="personal" onChange={(e) => setExpectedPersonal(e.target.value)}/>
                     <br />
-                    <label>Housing : </label> <input type="number" name="housing" onChange={(e) => setExpectedHousing(e.target.value)}/>
+                    <label>Housing : </label> <input type="number" defaultValue={expected['housing']} name="housing" onChange={(e) => setExpectedHousing(e.target.value)}/>
                     <br />
-                    <label>Mobile : </label> <input type="number" name="mobile" onChange={(e) => setExpectedMobile(e.target.value)}/>
+                    <label>Mobile : </label> <input type="number" defaultValue={expected['mobile']} name="mobile" onChange={(e) => setExpectedMobile(e.target.value)}/>
                     <br />
-                    <label>Insurance : </label> <input type="number" name="insurance" onChange={(e) => setExpectedInsurance(e.target.value)}/>
+                    <label>Insurance : </label> <input type="number" defaultValue={expected['insurance']} name="insurance" onChange={(e) => setExpectedInsurance(e.target.value)}/>
                     <br />
                     <input type="submit" value="Submit" />
                     

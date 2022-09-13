@@ -97,6 +97,7 @@ def logout(request):
     return HttpResponseRedirect(reverse("index"))
 
 
+
 def user_info(request, user_id):
     user = User.objects.get(pk=user_id)
 
@@ -112,17 +113,50 @@ def user_info(request, user_id):
             "reports": [report.serialze for report in reports]
         }, safe=False)
     
-    elif request.method == 'PUT':
+    #elif request.method == 'PUT':
+    #    data = json.loads(request.body)
+    #    if data.get("expected") is not None:
+    #        user.expected_expense.groceries = data["groceries"]
+    #        user.expected_expense.personal = data["personal"]
+    #        user.expected_expense.mobile = data["mobile"]
+    #        user.expected_expense.insurance = data["insurance"]
+    #        user.expected_expense.housing = data["housing"]
+    #        user.save()
+
+     #       return HttpResponse(status=204)
+    
+    return JsonResponse({
+        "error": "Not a GET or PUT request"
+    }, status = 400)
+
+@csrf_exempt
+def user_info_put(request, user_id):
+
+    user = User.objects.get(pk=user_id)
+
+    savings = user.savings
+    reports = Report.objects.filter(owner_user=user)
+
+    if request.method == 'PUT':
         data = json.loads(request.body)
         if data.get("expected") is not None:
-            user.expected_expense.groceries = data["groceries"]
-            user.expected_expense.personal = data["personal"]
-            user.expected_expense.mobile = data["mobile"]
-            user.expected_expense.insurance = data["insurance"]
-            user.expected_expense.housing = data["housing"]
+            expected = user.expected_expense
+
+            if data.get("groceries") is not None:
+                expected.groceries = data.get("groceries")
+            if data.get("personal") is not None:
+                expected.personal = data["personal"]
+            if data.get("mobile") is not None:
+                expected.mobile = data["mobile"]
+            if data.get("insurance") is not None:
+                expected.insurance = data["insurance"]
+            if data.get("housing") is not None:
+                expected.housing = data["housing"]
+            expected.save()
             user.save()
+
             return HttpResponse(status=204)
-    else:
-        return JsonResponse({
-            "error": "Not a GET or PUT request"
-        }, status = 400)
+    
+    return JsonResponse({
+        "error": "Not a GET or PUT request"
+    }, status = 400)
