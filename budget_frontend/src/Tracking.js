@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import './Tracking.css';
+import {FormDialogDeposit, FormDialogSaving} from './FormDialogue.js';
 
 function CurrentDeposit(props) {
     return (
         <div id="current-deposit-tracking">
             <label>Current Deposit: </label>
             <span> {props.userInfo.deposits} $</span>
-            <button>Deposit</button>
-            <button>Save</button>
+            <FormDialogDeposit userInfo={props.userInfo} setUserInfo={props.setUserInfo}/>
+            <FormDialogSaving userInfo={props.userInfo} setUserInfo={props.setUserInfo} />
         </div>
     )
 }
@@ -148,6 +149,7 @@ function ActualExpense(props) {
     console.log(itemList);
 
     const [expense, setExpense] = useState(0);
+    const [category, setCategory] = useState("")
 
     const render_list = () => {
         let tr = [];
@@ -160,12 +162,29 @@ function ActualExpense(props) {
     const render_radio = () => {
         let input = [];
         for (let k in itemList) {
-            input.push(<span><input type="radio" name="expense-cat" value={itemList[k]} id={itemList[k]} /> <label htmlFor={itemList[k]}> {itemList[k]} </label></span>)
+            input.push(<span><input type="radio" name="expense-cat" key={k} value={itemList[k]} id={itemList[k]} checked={category === itemList[k]} onChange={(e) => setCategory(e.target.value)} /> <label htmlFor={itemList[k]}> {itemList[k]} </label></span>)
         }
         return input;
     }
-    const submitExpense = function() {
+    const submitExpense = function(event) {
+        
 
+        fetch(`http://127.0.0.1:8000/user_info_put/${JSON.parse(localStorage.getItem("user")).id}`, {
+            method: 'PUT',
+
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                
+            },
+
+            body: JSON.stringify({
+                actual: 1,
+                number: parseInt(expense),
+                category: category
+            })
+        })
+        .then(res => console.log(res));
     }
     
     return(
@@ -203,7 +222,7 @@ export function Tracking(props) {
 
     return(
         <React.Fragment>
-            <CurrentDeposit userInfo={props.userInfo}/>
+            <CurrentDeposit userInfo={props.userInfo} setUserInfo={props.setUserInfo}/>
             <ExpectedExpense userInfo={props.userInfo} setUserInfo={props.setUserInfo} />
             <ActualExpense userInfo={props.userInfo} setUserInfo={props.setUserInfo} />
             <Saving userInfo={props.userInfo} />

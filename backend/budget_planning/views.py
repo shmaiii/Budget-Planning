@@ -1,4 +1,5 @@
 from imp import SEARCH_ERROR
+from platform import architecture
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login, logout
@@ -156,6 +157,39 @@ def user_info_put(request, user_id):
             user.save()
 
             return HttpResponse(status=204)
+        
+        if (data.get("actual") is not None):
+            expense = data["number"]
+            category = data["category"]
+            
+            actual = user.actual_expense
+            if category == "groceries":
+                actual.groceries = actual.groceries + expense
+            if category == "personal":
+                actual.personal = actual.personal + expense
+            if category == "mobile":
+                actual.mobile = actual.mobile + expense
+            if category == "insurance":
+                actual.insurance = actual.insurance + expense
+            if category == "housing":
+                actual.housing =  actual.housing + expense
+            actual.save()
+            user.save()
+
+            return HttpResponse(status=204)
+        
+        if (data.get("deposit") is not None):
+            amountDeposit = data["amountDeposit"]
+            user.total_deposit = user.total_deposit + amountDeposit
+            user.save()
+
+            return HttpResponse(status=204)
+        
+        if (data.get("saving") is not None):
+            amountSaving = data["amountSaving"]
+            user.savings = user.savings + amountSaving
+            user.total_deposit = user.total_deposit - amountSaving
+            user.save()
     
     return JsonResponse({
         "error": "Not a GET or PUT request"
